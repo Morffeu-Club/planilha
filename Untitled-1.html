@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Planilha de Orçamento Mensal</title>
+    <style>
+        /* Estilos CSS */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .table-container {
+            width: 50%;
+            padding: 20px;
+        }
+        .chart-container {
+            width: 30%;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 18px;
+            text-align: left;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2 style="text-align: center;">Planilha de Orçamento Mensal com Consórcio</h2>
+    <div class="container">
+        <div class="table-container">
+            <table>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Valor (R$)</th>
+                    <th>Valor Após Contemplação (R$)</th>
+                </tr>
+                <tr>
+                    <td>Receitas</td>
+                    <td><input type="number" id="salario" value="2303"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Despesas Fixas</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Alimentação</td>
+                    <td><input type="number" id="alimentacao" value="460"></td>
+                    <td><input type="number" id="alimentacaoAfter" value="460"></td>
+                </tr>
+                <tr>
+                    <td>Transporte</td>
+                    <td><input type="number" id="transporte" value="208"></td>
+                    <td><input type="number" id="transporteAfter" value="208"></td>
+                </tr>
+                <tr>
+                    <td>Outras despesas fixas</td>
+                    <td><input type="number" id="outrasFixas" value="150"></td>
+                    <td><input type="number" id="outrasFixasAfter" value="150"></td>
+                </tr>
+                <tr>
+                    <td>Total Despesas Fixas</td>
+                    <td><span id="totalFixas">0</span></td>
+                    <td><span id="totalFixasAfter">0</span></td>
+                </tr>
+                <tr>
+                    <td>Despesas Variáveis</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Despesas Variáveis</td>
+                    <td><input type="number" id="variaveis" value="100"></td>
+                    <td><input type="number" id="variaveisAfter" value="100"></td>
+                </tr>
+                <tr>
+                    <td>Total Despesas Variáveis</td>
+                    <td><span id="totalVariaveis">0</span></td>
+                    <td><span id="totalVariaveisAfter">0</span></td>
+                </tr>
+                <tr>
+                    <td>Consórcio</td>
+                    <td><input type="number" id="consorcio" value="273"></td>
+                    <td><input type="number" id="consorcioAfter" value="546"></td>
+                </tr>
+                <tr>
+                    <td>Total Despesas</td>
+                    <td><span id="totalDespesas">0</span></td>
+                    <td><span id="totalDespesasAfter">0</span></td>
+                </tr>
+                <tr>
+                    <td>Saldo</td>
+                    <td><span id="saldo">0</span></td>
+                    <td><span id="saldoAfter">0</span></td>
+                </tr>
+            </table>
+            <button onclick="calculate()">Calcular</button>
+        </div>
+        <div class="chart-container">
+            <canvas id="budgetChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            let salario = parseFloat(document.getElementById("salario").value);
+            let alimentacao = parseFloat(document.getElementById("alimentacao").value);
+            let transporte = parseFloat(document.getElementById("transporte").value);
+            let outrasFixas = parseFloat(document.getElementById("outrasFixas").value);
+            let variaveis = parseFloat(document.getElementById("variaveis").value);
+            let consorcio = parseFloat(document.getElementById("consorcio").value);
+            let saldo = salario - (alimentacao + transporte + outrasFixas + variaveis + consorcio);
+            document.getElementById("totalFixas").innerText = (alimentacao + transporte + outrasFixas).toFixed(2);
+            document.getElementById("totalVariaveis").innerText = variaveis.toFixed(2);
+            document.getElementById("totalDespesas").innerText = (alimentacao + transporte + outrasFixas + variaveis + consorcio).toFixed(2);
+            document.getElementById("saldo").innerText = saldo.toFixed(2);
+
+            // Atualizar gráfico
+            updateChart(alimentacao, transporte, outrasFixas, variaveis, consorcio, saldo);
+        }
+
+        function updateChart(alimentacao, transporte, outrasFixas, variaveis, consorcio, saldo) {
+            const ctx = document.getElementById('budgetChart').getContext('2d');
+            const budgetChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Alimentação', 'Transporte', 'Outras Despesas Fixas', 'Despesas Variáveis', 'Consórcio', 'Saldo'],
+                    datasets: [{
+                        label: 'Distribuição do Orçamento',
+                        data: [alimentacao, transporte, outrasFixas, variaveis, consorcio, saldo],
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FFA07A', '#A9A9A9'],
+                        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#FFA07A', '#A9A9A9']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': R$ ' + context.raw.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Chamar a função calculate ao carregar a página
+        window.onload = calculate;
+    </script>
+</body>
+</html>
